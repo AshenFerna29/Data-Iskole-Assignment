@@ -145,7 +145,7 @@ Enter the ID of the superhero you want to delete: 12
 * Users can only delete superheroes with ID greater than 11 (i.e., user-added ones).
 * All additions and deletions persist by updating the actual CSV files.
 * The code is modular and easily extendable if you wish to include more advanced analytics or UI.
-* Optional networkx + matplotlib graph rendering is available by uncommenting a few lines near the end of main.py.
+
 
 ##  Thank You!
 
