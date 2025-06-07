@@ -3,6 +3,11 @@ import pandas as pd
 from datetime import datetime
 from loader import load_superheroes, load_links
 from fileops import save_superheroes, save_links
+import logging
+
+# Configure logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 def add_superhero(heroes_df, links_df):
     try:
@@ -17,13 +22,14 @@ def add_superhero(heroes_df, links_df):
                 print(" That superhero already exists! Try another name.")
                 continue
 
-            break  
+            break  # Valid and unique name
 
         new_id = heroes_df['id'].max() + 1 if not heroes_df.empty else 1
         created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         new_hero = pd.DataFrame([{'id': new_id, 'name': name.title(), 'created_at': created_at}])
         heroes_df = pd.concat([heroes_df, new_hero], ignore_index=True)
         print(f" Superhero '{name}' added with ID {new_id}.")
+        logger.info(f"Added superhero: {name} (ID: {new_id})")
 
         while True:
             conn = input("Do you want to add a connection? (YES/NO): ").strip().upper()
@@ -42,10 +48,11 @@ def add_superhero(heroes_df, links_df):
                 new_link = pd.DataFrame([{'source': new_id, 'target': target_id}])
                 links_df = pd.concat([links_df, new_link], ignore_index=True)
                 print(f" Connection added between {new_id} and {target_id}.")
+                logger.info(f"Added connection from {new_id} to {target_id}")
             except ValueError:
                 print(" Please enter a valid numeric ID.")
     except Exception as e:
-        print(f" Error while adding superhero: {e}")
+        logger.error(f"Error while adding superhero: {e}")
 
     return heroes_df, links_df
 
@@ -72,11 +79,12 @@ def delete_superhero(heroes_df, links_df):
                     heroes_df = heroes_df[heroes_df['id'] != del_id]
                     links_df = links_df[(links_df['source'] != del_id) & (links_df['target'] != del_id)]
                     print(f" Deleted superhero '{name}' and all associated connections.")
-                    break  
+                    logger.info(f"Deleted superhero: {name} (ID: {del_id})")
+                    break
             except ValueError:
                 print(" Invalid input. Please enter a valid numeric ID.")
     except Exception as e:
-        print(f" Error while deleting superhero: {e}")
+        logger.error(f"Error while deleting superhero: {e}")
 
     return heroes_df, links_df
 
@@ -99,11 +107,12 @@ def handle_user_interaction(heroes, links):
             try:
                 save_superheroes(heroes)
                 save_links(links)
+                logger.info("Saved superheroes and links to CSV.")
             except Exception as save_err:
-                print(f" Failed to save files: {save_err}")
+                logger.error(f"Failed to save files: {save_err}")
 
     except Exception as e:
-        print(f" Unexpected error in user interaction: {e}")
+        logger.critical(f"Unexpected error in user interaction: {e}")
 
     # Ask once after all interaction
     show = input("Do you want to display the superhero graph? (YES/NO): ").strip().upper()
@@ -113,8 +122,8 @@ def handle_user_interaction(heroes, links):
             show_graph(heroes, links)
         except ImportError:
             print(" Could not import visualizer module.")
+            logger.warning("Visualizer module could not be imported.")
         except Exception as vis_err:
-            print(f" Error displaying graph: {vis_err}")
+            logger.error(f"Error displaying graph: {vis_err}")
 
     return heroes, links
-

@@ -1,28 +1,34 @@
-#imports
+
+# Imports
+import os
+import logging
 from loader import load_superheroes, load_links
 from analyzer import *
 from interact import handle_user_interaction
-import os
 
-#main function
+# Logger configuration
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
+
+# Main function
 def main():
     try:
         os.system("clear" if os.name == "posix" else "cls")
         print(" Welcome to the Superhero Universe Network\n")
 
-        
+        # Load data
         heroes = load_superheroes("data/superheroes.csv")
         links = load_links("data/links.csv")
 
-        
+        # Display totals
         try:
             total_heroes, total_links = get_total_counts(heroes, links)
             print(f" Total Superheroes: {total_heroes}")
             print(f" Total Connections: {total_links}\n")
         except Exception as e:
-            print(f" Failed to compute totals: {e}")
+            logger.error(f"Failed to compute totals: {e}")
 
-        # Recently added heroes
+        # Recently added superheroes
         print(" Recently Added Superheroes (last 3 days):")
         try:
             recent_heroes = get_recent_heroes(heroes)
@@ -32,9 +38,9 @@ def main():
                 for _, row in recent_heroes.iterrows():
                     print(f"  - {row['name']} (Added: {row['created_at']})")
         except Exception as e:
-            print(f" Error displaying recent heroes: {e}")
+            logger.error(f"Error displaying recent heroes: {e}")
 
-        # Most connected heroes
+        # Most connected
         print("\n Most Connected Superheroes:")
         try:
             most_connected = get_most_connected(links, heroes)
@@ -44,8 +50,9 @@ def main():
                 for name, id_, count in most_connected:
                     print(f"  - {name} (ID: {id_}) with {count} connections")
         except Exception as e:
-            print(f" Error finding most connected heroes: {e}")
-        # Info about 'dataiskole'
+            logger.error(f"Error finding most connected heroes: {e}")
+
+        # Info on 'dataiskole'
         print("\n Info on 'dataiskole':")
         try:
             added_on, friends = get_dataiskole_info(heroes, links)
@@ -60,17 +67,17 @@ def main():
             else:
                 print("  - 'dataiskole' not found.")
         except Exception as e:
-            print(f" Error fetching 'dataiskole' info: {e}")
+            logger.error(f"Error fetching 'dataiskole' info: {e}")
 
-        # User interaction (add/delete/graph)
-
+        # User interaction loop
         try:
             heroes, links = handle_user_interaction(heroes, links)
         except Exception as e:
-            print(f" Error in user interaction: {e}")
+            logger.error(f"Error in user interaction: {e}")
 
     except Exception as e:
-        print(f"\n Unexpected error occurred in main program: {e}")
+        logger.critical(f"Unexpected error occurred in main program: {e}")
+        print("\n An unexpected error occurred. Please check logs for more details.")
 
 if __name__ == "__main__":
     main()

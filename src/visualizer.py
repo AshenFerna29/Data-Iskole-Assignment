@@ -1,5 +1,12 @@
+# src/visualizer.py
+
 import matplotlib.pyplot as plt
 import networkx as nx
+import logging
+
+# Setup logger
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
 
 def show_graph(heroes_df, links_df):
     try:
@@ -33,16 +40,17 @@ def show_graph(heroes_df, links_df):
             print(" Graph has no connections.")
             return
 
-        # Prepare drawing attributes
+        # Prepare attributes
         labels = nx.get_node_attributes(G, "label")
         degrees = dict(G.degree())
 
-        node_sizes = [300 + degrees[n] * 150 for n in G.nodes()]  
-        node_colors = ['lightcoral' if degrees[n] >= 3 else 'skyblue' for n in G.nodes()]  
+        node_sizes = [300 + degrees[n] * 150 for n in G.nodes()]
+        node_colors = ['lightcoral' if degrees[n] >= 3 else 'skyblue' for n in G.nodes()]
         edge_widths = [1.2 for _ in G.edges()]
 
+        # Draw graph
         plt.figure(figsize=(12, 9))
-        pos = nx.spring_layout(G, seed=42, k=0.5) 
+        pos = nx.spring_layout(G, seed=42, k=0.5)
 
         nx.draw_networkx_nodes(G, pos, node_size=node_sizes, node_color=node_colors, alpha=0.9)
         nx.draw_networkx_edges(G, pos, width=edge_widths, edge_color="gray", alpha=0.5)
@@ -54,4 +62,5 @@ def show_graph(heroes_df, links_df):
         plt.show()
 
     except Exception as e:
-        print(f" Error generating graph: {e}")
+        logger.error(f"Error generating graph: {e}")
+        print(" An unexpected error occurred while generating the graph. Please check logs for more details.")
